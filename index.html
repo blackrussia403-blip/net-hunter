@@ -2,154 +2,114 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MrsMajor Visual Horror Experience</title>
+    <title>MrsMajor Visual Test</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background: #000; overflow: hidden; font-family: "Tahoma", sans-serif;
-            user-select: none;
         }
 
-        /* Слой крови */
+        /* Кнопка запуска (обязательна для браузера) */
+        #btn-start {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            padding: 20px 40px; background: #8a0303; color: white;
+            border: 2px solid #fff; font-size: 20px; cursor: pointer; z-index: 10000;
+            box-shadow: 0 0 20px red; text-transform: uppercase;
+        }
+
         #bloodCanvas {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 9999; pointer-events: none;
+            z-index: 1000; pointer-events: none;
         }
 
-        /* Глитч-эффект на весь экран */
-        .glitch-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://giphy.com');
-            opacity: 0.1; z-index: 1; pointer-events: none;
-        }
-
-        /* Окна Windows XP */
         .xp-window {
-            position: absolute; width: 350px; 
+            position: absolute; width: 300px; height: 150px;
             background: #ece9d8; border: 2px solid #0054e3;
             border-top-left-radius: 4px; border-top-right-radius: 4px;
-            box-shadow: 15px 15px 30px rgba(0,0,0,0.7);
             z-index: 100; animation: shake 0.1s infinite;
         }
 
         .title-bar {
             background: linear-gradient(180deg, #0054e3 0%, #27c1ff 100%);
-            color: white; padding: 4px 10px; font-weight: bold; font-size: 13px;
-            display: flex; justify-content: space-between; align-items: center;
+            color: white; padding: 3px 8px; font-weight: bold; font-size: 12px;
+            display: flex; justify-content: space-between;
         }
 
-        .content {
-            padding: 20px; color: #000; text-align: center;
-            border-bottom: 1px solid #999;
-        }
-
-        .error-icon {
-            width: 40px; height: 40px; background: red; color: white;
-            border-radius: 50%; display: inline-block; line-height: 40px;
-            font-size: 30px; font-weight: bold; margin-bottom: 10px;
-        }
+        .content { padding: 15px; color: #000; text-align: center; font-weight: bold; }
 
         @keyframes shake {
-            0% { transform: translate(2px, 1px) rotate(0deg); }
-            50% { transform: translate(-1px, -2px) rotate(-1deg); }
-            100% { transform: translate(1px, 2px) rotate(1deg); }
-        }
-
-        #overlay-text {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #ff0000; font-size: 40px; font-weight: bold; 
-            z-index: 10000; cursor: pointer; text-shadow: 0 0 20px red;
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -1px); }
+            100% { transform: translate(1px, 1px); }
         }
     </style>
 </head>
 <body>
 
-<div id="overlay-text">RUN MRSMAJOR.EXE</div>
-<div class="glitch-layer"></div>
-<canvas id="bloodCanvas"></canvas>
+    <button id="btn-start">START MRSMAJOR.EXE</button>
+    <canvas id="bloodCanvas"></canvas>
 
-<audio id="bgm" loop>
-    <source src="https://myinstants.com" type="audio/mpeg">
-</audio>
+    <audio id="bgm" loop>
+        <source src="https://myinstants.com" type="audio/mpeg">
+    </audio>
 
-<script>
-    const canvas = document.getElementById('bloodCanvas');
-    const ctx = canvas.getContext('2d');
-    const bgm = document.getElementById('bgm');
-    const overlay = document.getElementById('overlay-text');
+    <script>
+        const btn = document.getElementById('btn-start');
+        const canvas = document.getElementById('bloodCanvas');
+        const ctx = canvas.getContext('2d');
+        const bgm = document.getElementById('bgm');
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    let drops = [];
+        let drops = [];
 
-    function initBlood() {
-        for(let i = 0; i < 80; i++) {
-            drops.push({
-                x: Math.random() * canvas.width,
-                y: -Math.random() * 500,
-                speed: 1 + Math.random() * 4,
-                w: 15 + Math.random() * 30
-            });
+        function initBlood() {
+            for(let i = 0; i < 40; i++) {
+                drops.push({
+                    x: Math.random() * canvas.width,
+                    y: 0,
+                    speed: 1 + Math.random() * 3,
+                    w: 10 + Math.random() * 20
+                });
+            }
         }
-    }
 
-    function animateBlood() {
-        ctx.fillStyle = 'rgba(150, 0, 0, 0.6)';
-        drops.forEach(d => {
-            // Рисуем подтек
-            ctx.fillRect(d.x, 0, d.w, d.y);
-            // Капля на конце
-            ctx.beginPath();
-            ctx.arc(d.x + d.w/2, d.y, d.w/1.2, 0, Math.PI*2);
-            ctx.fill();
+        function draw() {
+            ctx.fillStyle = 'rgba(138, 3, 3, 0.5)';
+            drops.forEach(d => {
+                ctx.fillRect(d.x, 0, d.w, d.y); // Рисуем полосу крови
+                ctx.beginPath();
+                ctx.arc(d.x + d.w/2, d.y, d.w/1.1, 0, Math.PI*2);
+                ctx.fill();
+                d.y += d.speed;
+                if(d.y > canvas.height + 50) d.y = -20;
+            });
+            requestAnimationFrame(draw);
+        }
 
-            d.y += d.speed;
-            if(d.y > canvas.height + 100) d.y = -100;
-        });
-        requestAnimationFrame(animateBlood);
-    }
+        function spawnWindow() {
+            const win = document.createElement('div');
+            win.className = 'xp-window';
+            win.style.left = Math.random() * (window.innerWidth - 300) + 'px';
+            win.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+            win.innerHTML = `
+                <div class="title-bar"><span>Critical Error</span><span>[X]</span></div>
+                <div class="content"><p>SYSTEM FAILURE</p><p>MrsMajor.exe active</p></div>
+            `;
+            document.body.appendChild(win);
+            
+            // Чтобы не лагало, удаляем старые через 5 секунд
+            setTimeout(() => win.remove(), 5000);
+        }
 
-    function createWin() {
-        const win = document.createElement('div');
-        win.className = 'xp-window';
-        win.style.left = Math.random() * (window.innerWidth - 300) + 'px';
-        win.style.top = Math.random() * (window.innerHeight - 200) + 'px';
-        
-        win.innerHTML = `
-            <div class="title-bar"><span>System Error</span><span style="border:1px solid #fff; padding:0 3px;">X</span></div>
-            <div class="content">
-                <div class="error-icon">X</div>
-                <p><b>Fatal Error!</b></p>
-                <p>Memory could not be read.</p>
-            </div>
-        `;
-        document.body.appendChild(win);
-
-        // Авто-удаление старых окон, чтобы браузер не вылетел сразу (лимит 100 окон)
-        const allWins = document.querySelectorAll('.xp-window');
-        if(allWins.length > 100) allWins[0].remove();
-    }
-
-    document.addEventListener('click', () => {
-        overlay.style.display = 'none';
-        bgm.play();
-        initBlood();
-        animateBlood();
-        
-        // Массивный спам окон
-        setInterval(createWin, 200); 
-        
-        // Эффект ускорения через 15 секунд
-        setTimeout(() => {
-            setInterval(createWin, 50);
-            document.body.style.filter = "invert(1) contrast(2)";
-        }, 15000);
-        
-    }, { once: true });
-
-    window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-</script>
-
+        btn.onclick = () => {
+            btn.style.display = 'none';
+            bgm.play().catch(() => console.log("Звук заблокирован"));
+            initBlood();
+            draw();
+            setInterval(spawnWindow, 300);
+        };
+    </script>
 </body>
 </html>
