@@ -1,66 +1,62 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS MAJOR - FINAL</title>
+    <title>MRS MAJOR ULTIMATE</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: monospace; }
-        /* Кровавый фон */
-        #b { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f00; opacity: 0; z-index: 10; pointer-events: none; }
-        /* Маска (встроил её кодом, чтобы точно была видна) */
-        #face { position: fixed; width: 100%; height: 100%; top: 0; left: 0; display: none; z-index: 5; filter: contrast(2) brightness(0.5); background: url('https://ibb.co') center/contain no-repeat; animation: s 0.05s infinite; }
-        @keyframes s { 0% { transform: translate(4px, 4px); } 50% { transform: translate(-4px, -4px); } 100% { transform: translate(4px, -4px); } }
-        /* Надписи */
-        .msg { position: fixed; color: #fff; background: #900; font-weight: 900; font-size: 25px; z-index: 50; padding: 5px; white-space: nowrap; pointer-events: none; }
-        #btn { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f00; color: #000; border: 5px solid #fff; padding: 50px; font-size: 30px; font-weight: 900; cursor: pointer; z-index: 100; border-radius: 20px; box-shadow: 0 0 100px red; }
+        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Tahoma', sans-serif; }
+        /* Эффект стекающей крови */
+        #blood { position: fixed; top: -100%; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, #f00, #700); z-index: 100; pointer-events: none; transition: top 20s linear; }
+        /* Окна Windows XP */
+        .win { position: absolute; width: 200px; background: #ece9d8; border: 2px solid #0054e3; box-shadow: 3px 3px 10px #000; z-index: 500; }
+        .head { background: linear-gradient(90deg, #0054e3, #27c4fb); color: #fff; padding: 2px 5px; font-size: 11px; font-weight: bold; display: flex; justify-content: space-between; }
+        .body { padding: 10px; color: #000; text-align: center; font-size: 13px; font-weight: bold; }
+        .major { position: fixed; width: 80%; top: 10%; left: 10%; filter: invert(1) brightness(0.5); z-index: 50; display: none; animation: s 0.05s infinite; }
+        @keyframes s { 0% { transform: translate(5px,5px); } 50% { transform: translate(-5px,-5px); } }
+        #btn { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f00; color: #fff; border: 4px solid #fff; padding: 30px; font-size: 20px; font-weight: 900; cursor: pointer; z-index: 2000; }
     </style>
 </head>
 <body>
-    <div id="b"></div>
-    <div id="face"></div>
-    <button id="btn" onclick="start()">ИНИЦИИРОВАТЬ</button>
+    <div id="blood"></div>
+    <img src="https://ibb.co" class="major" id="m">
+    <button id="btn" onclick="go()">START INFECTION</button>
 
     <script>
-        function start() {
+        function go() {
             document.getElementById('btn').style.display = 'none';
-            document.getElementById('face').style.display = 'block';
-            const b = document.getElementById('b');
-            const audio = new (window.AudioContext || window.webkitAudioContext)();
+            document.getElementById('m').style.display = 'block';
+            document.getElementById('blood').style.top = '0'; // Кровь потекла вниз
 
-            // ТА САМАЯ МЕЛОДИЯ (Song of Unhealing) - ГРОМКО
-            const m = [261, 277, 261, 233, 220, 233, 220, 196]; // Жуткий ритм
-            let step = 0;
+            const audio = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // ТА САМАЯ МЕЛОДИЯ (Song of Unhealing)
+            const notes =; 
+            let n = 0;
 
             setInterval(() => {
                 const o = audio.createOscillator();
                 const g = audio.createGain();
-                o.type = 'square'; // Самый "грязный" звук
-                o.frequency.setValueAtTime(m[step % m.length], audio.currentTime);
-                g.gain.setTargetAtTime(0.2, audio.currentTime, 0.05); // Громкость
+                o.type = 'triangle'; // Звук шкатулки
+                o.frequency.setValueAtTime(notes[n % notes.length], audio.currentTime);
+                g.gain.setTargetAtTime(0.1, audio.currentTime, 0.05);
                 o.connect(g); g.connect(audio.destination);
-                o.start(); o.stop(audio.currentTime + 0.15);
-                step++;
-
-                // Мигание кровью под ритм
-                b.style.opacity = Math.random() > 0.4 ? 0.6 : 0;
+                o.start(); o.stop(audio.currentTime + 0.25);
+                n++;
                 
-                if (navigator.vibrate) navigator.vibrate(80);
-                
-                spawnMsg();
-            }, 180);
+                spawnWin();
+                if (navigator.vibrate) navigator.vibrate(40);
+            }, 350); // Ритм шкатулки
         }
 
-        function spawnMsg() {
-            const d = document.createElement('div');
-            d.className = 'msg';
-            const txt = ["YOU ARE TASTY", "SYSTEM DEAD", "MRS MAJOR", "666", "DIE DIE DIE"];
-            d.innerText = txt[Math.floor(Math.random() * txt.length)];
-            d.style.left = Math.random() * 80 + "%";
-            d.style.top = Math.random() * 90 + "%";
-            d.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
-            document.body.appendChild(d);
-            setTimeout(() => d.remove(), 500);
+        function spawnWin() {
+            const w = document.createElement('div');
+            w.className = 'win';
+            w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            w.innerHTML = `<div class="head"><span>Error</span><span>X</span></div><div class="body">YOU ARE TASTY</div>`;
+            document.body.appendChild(w);
+            setTimeout(() => w.remove(), 4000);
         }
     </script>
 </body>
