@@ -3,41 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MrsMajor ULTIMATE</title>
+    <title>MrsMajor Ultimate Mobile</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; transition: background 3s ease-in-out; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; transition: background 2s; }
         
-        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        #start-btn { padding: 30px 60px; background: #600; color: #fff; border: 5px double #f00; font-size: 24px; font-weight: bold; cursor: pointer; text-shadow: 0 0 10px red; }
+        /* Кнопка запуска */
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        #start-btn { padding: 25px 50px; background: #900; color: #fff; border: 4px solid #f00; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 0 30px #f00; }
+        #hint { color: #555; margin-top: 15px; font-size: 12px; }
 
-        .blood { position: absolute; top: -120%; width: 30px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; }
-        @keyframes drip { to { top: 120%; } }
+        /* Кровь */
+        .blood { position: absolute; top: -110%; width: 25px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; }
+        @keyframes drip { to { top: 110%; } }
 
-        .win { position: absolute; width: 160px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; animation: shake 0.1s infinite, fade 5s forwards; pointer-events: none; opacity: 0.9; }
-        .win-h { background: #0054e3; color: #fff; font-size: 10px; padding: 2px 5px; font-weight: bold; }
-        .win-b { padding: 10px; color: #000; font-size: 12px; text-align: center; }
+        /* Окна */
+        .win { position: absolute; width: 180px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; animation: shake 0.1s infinite; pointer-events: none; }
+        .win-h { background: #0054e3; color: #fff; font-size: 10px; padding: 3px; font-weight: bold; }
+        .win-b { padding: 12px; color: #000; font-size: 11px; text-align: center; }
 
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, 1px); } }
-        @keyframes fade { 0%, 80% { opacity: 0.9; } 100% { opacity: 0; } }
-
-        /* Класс для покраснения */
-        .blood-background { background: #600 !important; }
     </style>
 </head>
 <body>
 
-<div id="overlay"><button id="start-btn">RUN PROJECT</button></div>
+<div id="overlay">
+    <button id="start-btn">START.EXE</button>
+    <div id="hint">Включи звук на телефоне</div>
+</div>
+
 <div id="blood-box"></div>
 
-<!-- Прямая ссылка на классический хоррор-саундтрек -->
-<audio id="horror-sound" crossorigin="anonymous" loop>
-    <source src="https://soundboard.com" type="audio/mpeg">
+<!-- Прямая рабочая ссылка на Song of Unhealing -->
+<audio id="horror-audio" loop preload="auto">
+    <source src="https://myinstants.com" type="audio/mpeg">
 </audio>
 
 <script>
     const btn = document.getElementById('start-btn');
     const overlay = document.getElementById('overlay');
-    const audio = document.getElementById('horror-sound');
+    const audio = document.getElementById('horror-audio');
     const bloodBox = document.getElementById('blood-box');
 
     function spawnBlood() {
@@ -45,48 +49,45 @@
         d.className = 'blood';
         d.style.left = Math.random() * 100 + '%';
         d.style.height = (200 + Math.random() * 400) + 'px';
-        d.style.width = (20 + Math.random() * 20) + 'px';
+        d.style.width = (15 + Math.random() * 20) + 'px';
         bloodBox.appendChild(d);
-        setTimeout(() => d.remove(), 4000);
+        setTimeout(() => d.remove(), 4500);
     }
 
     function spawnWin() {
         const w = document.createElement('div');
         w.className = 'win';
-        w.style.left = Math.random() * (window.innerWidth - 160) + 'px';
+        w.style.left = Math.random() * (window.innerWidth - 180) + 'px';
         w.style.top = Math.random() * (window.innerHeight - 80) + 'px';
-        w.innerHTML = `<div class="win-h">System Error</div><div class="win-b">Memory Corrupted<br>0x666</div>`;
+        w.innerHTML = `<div class="win-h">Error 0x666</div><div class="win-b">Your system is bleeding...</div>`;
         document.body.appendChild(w);
-        setTimeout(() => w.remove(), 5000);
+        setTimeout(() => w.remove(), 6000);
     }
 
-    // Цикл плавного покраснения экрана
+    // Эффект пульсации экрана
     function pulse() {
-        document.body.classList.add('blood-background');
-        setTimeout(() => {
-            document.body.classList.remove('blood-background');
-        }, 3000); // 3 секунды красный, потом резко черный
+        document.body.style.background = "#500";
+        setTimeout(() => { document.body.style.background = "#000"; }, 2000);
     }
 
     btn.onclick = () => {
         overlay.style.display = 'none';
         
-        // РАЗБЛОКИРОВКА ЗВУКА ДЛЯ МОБИЛОК
+        // СИЛОВОЙ ЗАПУСК ЗВУКА
         audio.volume = 1.0;
-        const playAttempt = audio.play();
-
-        if (playAttempt !== undefined) {
-            playAttempt.catch(error => {
-                // Если всё равно не пошло, выводим алерт для проверки
-                console.log("Audio failed:", error);
-                alert("Нажми ОК, чтобы музыка включилась");
+        audio.play().then(() => {
+            console.log("Музыка пошла!");
+        }).catch(e => {
+            // Если браузер всё еще блокирует, пробуем через "взлом" контекста
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            context.resume().then(() => {
                 audio.play();
             });
-        }
+        });
 
-        setInterval(spawnBlood, 350);
-        setInterval(spawnWin, 600);
-        setInterval(pulse, 6000); // Каждые 6 сек экран наливается кровью
+        setInterval(spawnBlood, 400);
+        setInterval(spawnWin, 800);
+        setInterval(pulse, 5000);
     };
 </script>
 
