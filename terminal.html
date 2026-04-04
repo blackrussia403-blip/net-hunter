@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>System Terminal v4.0</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #0f0; font-family: 'Courier New', monospace; overflow: hidden; }
+        
+        /* Экран входа */
+        #boot { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; z-index: 1000; }
+        #boot-btn { padding: 15px 30px; background: transparent; color: #0f0; border: 1px solid #0f0; font-family: monospace; font-size: 18px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        #boot-btn:hover { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
+
+        /* Терминал */
+        #terminal { display: none; padding: 20px; font-size: 13px; line-height: 1.5; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        .log { margin-bottom: 4px; opacity: 0; animation: fadeIn 0.1s forwards; }
+        .green { color: #0f0; }
+        .red { color: #f00; font-weight: bold; }
+        .yellow { color: #ff0; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Финальное окно */
+        #alert-box { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; background: #000; border: 2px solid #f00; padding: 30px; 
+            text-align: center; z-index: 2000; box-shadow: 0 0 40px #f00;
+        }
+        #alert-box h1 { color: #f00; margin: 0 0 20px 0; font-size: 22px; text-transform: uppercase; }
+        #alert-box p { color: #fff; font-size: 16px; line-height: 1.6; margin: 0; }
+        .target { color: #f00; font-weight: bold; text-decoration: underline; }
+
+        /* Эффект глитча при финале */
+        .glitch-bg { animation: glitch 0.15s infinite; }
+        @keyframes glitch {
+            0% { transform: translate(2px, 1px); }
+            50% { transform: translate(-1px, -2px); background: #200; }
+            100% { transform: translate(1px, -1px); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="boot"><button id="boot-btn" onclick="init()">Connect to Remote Host</button></div>
+
+<div id="terminal"></div>
+
+<div id="alert-box">
+    <h1>CRITICAL SECURITY BREACH</h1>
+    <p>ВСЕ ДАННЫЕ УСТРОЙСТВА ПЕРЕДАНЫ В КОМАНДНЫЙ ЦЕНТР: <br><span class="target">ISLAM_GIGAEV</span></p>
+</div>
+
+<script>
+    const term = document.getElementById('terminal');
+    const alertBox = document.getElementById('alert-box');
+    const boot = document.getElementById('boot');
+
+    const logs = [
+        {t: "Initializing handshake...", c: "green"},
+        {t: "Connecting to bypass proxy...", c: "green"},
+        {t: "Target device identified: REMOTE_USER_DEVICE", c: "yellow"},
+        {t: "Scanning kernel vulnerabilities...", c: "green"},
+        {t: "Exploit found: CVE-2026-X8801 (Root Access)", c: "red"},
+        {t: "Injecting payload into system processes...", c: "yellow"},
+        {t: "Bypassing biometric firewall...", c: "green"},
+        {t: "Accessing internal memory...", c: "yellow"},
+        {t: "Downloading /contacts.db...", c: "green"},
+        {t: "Downloading /telegram_sessions/...", c: "green"},
+        {t: "Decrypting private_keys...", c: "red"},
+        {t: "Extracting GPS location history...", c: "yellow"},
+        {t: "Uploading archive to master_server...", c: "green"},
+        {t: "Cleaning logs to avoid detection...", c: "yellow"},
+        {t: "SUCCESS: Remote access established.", c: "red"}
+    ];
+
+    function init() {
+        boot.style.display = 'none';
+        term.style.display = 'block';
+        runLogs(0);
+    }
+
+    function runLogs(index) {
+        if (index < logs.length) {
+            const line = document.createElement('div');
+            line.className = 'log ' + logs[index].c;
+            const time = new Date().toLocaleTimeString();
+            line.innerHTML = `[${time}] root@system:~$ ${logs[index].t}`;
+            term.appendChild(line);
+            
+            // Автоматическая прокрутка
+            term.scrollTop = term.scrollHeight;
+            
+            // Случайная задержка печати для реализма
+            setTimeout(() => runLogs(index + 1), 300 + Math.random() * 700);
+        } else {
+            setTimeout(showFinal, 1200);
+        }
+    }
+
+    function showFinal() {
+        document.body.classList.add('glitch-bg');
+        alertBox.style.display = 'block';
+        document.body.style.background = '#100';
+    }
+</script>
+
+</body>
+</html>
