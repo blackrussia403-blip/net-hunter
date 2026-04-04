@@ -2,40 +2,38 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MrsMajor Visual Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MrsMajor Mobile Edition</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000; overflow: hidden; font-family: "Tahoma", sans-serif;
+            background: #000; overflow: hidden; font-family: sans-serif;
         }
 
-        /* Кнопка запуска (обязательна для браузера) */
-        #btn-start {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            padding: 20px 40px; background: #8a0303; color: white;
-            border: 2px solid #fff; font-size: 20px; cursor: pointer; z-index: 10000;
-            box-shadow: 0 0 20px red; text-transform: uppercase;
-        }
-
-        #bloodCanvas {
+        #ui-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1000; pointer-events: none;
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.8);
         }
 
-        .xp-window {
-            position: absolute; width: 300px; height: 150px;
-            background: #ece9d8; border: 2px solid #0054e3;
-            border-top-left-radius: 4px; border-top-right-radius: 4px;
-            z-index: 100; animation: shake 0.1s infinite;
+        #start-btn {
+            padding: 20px 40px; background: #800; color: white;
+            border: 3px solid #f00; font-size: 22px; font-weight: bold;
+            text-transform: uppercase; cursor: pointer; box-shadow: 0 0 20px #f00;
         }
 
-        .title-bar {
-            background: linear-gradient(180deg, #0054e3 0%, #27c1ff 100%);
-            color: white; padding: 3px 8px; font-weight: bold; font-size: 12px;
-            display: flex; justify-content: space-between;
+        canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 500; pointer-events: none;
         }
 
-        .content { padding: 15px; color: #000; text-align: center; font-weight: bold; }
+        .xp-win {
+            position: absolute; width: 200px; background: #ece9d8;
+            border: 2px solid #0054e3; z-index: 100;
+            animation: shake 0.1s infinite; pointer-events: none;
+        }
+        .t-bar { background: #0054e3; color: white; font-size: 10px; padding: 2px 5px; }
+        .win-body { padding: 10px; color: black; font-size: 12px; text-align: center; }
 
         @keyframes shake {
             0% { transform: translate(1px, 1px); }
@@ -46,69 +44,76 @@
 </head>
 <body>
 
-    <button id="btn-start">START MRSMAJOR.EXE</button>
-    <canvas id="bloodCanvas"></canvas>
+    <div id="ui-layer">
+        <button id="start-btn">ЗАПУСТИТЬ</button>
+    </div>
 
-    <audio id="bgm" loop>
+    <canvas id="blood"></canvas>
+
+    <audio id="horror-bgm" loop>
         <source src="https://myinstants.com" type="audio/mpeg">
     </audio>
 
     <script>
-        const btn = document.getElementById('btn-start');
-        const canvas = document.getElementById('bloodCanvas');
+        const canvas = document.getElementById('blood');
         const ctx = canvas.getContext('2d');
-        const bgm = document.getElementById('bgm');
+        const bgm = document.getElementById('horror-bgm');
+        const btn = document.getElementById('start-btn');
+        const ui = document.getElementById('ui-layer');
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         let drops = [];
 
-        function initBlood() {
-            for(let i = 0; i < 40; i++) {
+        function createDrops() {
+            for(let i = 0; i < 30; i++) {
                 drops.push({
                     x: Math.random() * canvas.width,
                     y: 0,
-                    speed: 1 + Math.random() * 3,
+                    s: 1 + Math.random() * 4,
                     w: 10 + Math.random() * 20
                 });
             }
         }
 
-        function draw() {
-            ctx.fillStyle = 'rgba(138, 3, 3, 0.5)';
+        function animate() {
+            // Очистка экрана, чтобы не было "голубого" бага
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = 'rgba(120, 0, 0, 0.7)';
             drops.forEach(d => {
-                ctx.fillRect(d.x, 0, d.w, d.y); // Рисуем полосу крови
+                // Рисуем след крови от самого верха
+                ctx.fillRect(d.x, 0, d.w, d.y);
+                // Капля снизу
                 ctx.beginPath();
-                ctx.arc(d.x + d.w/2, d.y, d.w/1.1, 0, Math.PI*2);
+                ctx.arc(d.x + d.w/2, d.y, d.w/1.2, 0, Math.PI*2);
                 ctx.fill();
-                d.y += d.speed;
-                if(d.y > canvas.height + 50) d.y = -20;
+
+                d.y += d.s;
+                if(d.y > canvas.height + 100) d.y = -50;
             });
-            requestAnimationFrame(draw);
+            requestAnimationFrame(animate);
         }
 
-        function spawnWindow() {
-            const win = document.createElement('div');
-            win.className = 'xp-window';
-            win.style.left = Math.random() * (window.innerWidth - 300) + 'px';
-            win.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-            win.innerHTML = `
-                <div class="title-bar"><span>Critical Error</span><span>[X]</span></div>
-                <div class="content"><p>SYSTEM FAILURE</p><p>MrsMajor.exe active</p></div>
-            `;
-            document.body.appendChild(win);
-            
-            // Чтобы не лагало, удаляем старые через 5 секунд
-            setTimeout(() => win.remove(), 5000);
+        function spawnWin() {
+            const w = document.createElement('div');
+            w.className = 'xp-win';
+            w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            w.innerHTML = '<div class="t-bar">Error</div><div class="win-body">Fatal Error!</div>';
+            document.body.appendChild(w);
+            if(document.querySelectorAll('.xp-win').length > 40) {
+                document.querySelector('.xp-win').remove();
+            }
         }
 
         btn.onclick = () => {
-            btn.style.display = 'none';
-            bgm.play().catch(() => console.log("Звук заблокирован"));
-            initBlood();
-            draw();
-            setInterval(spawnWindow, 300);
+            ui.style.display = 'none';
+            bgm.play().catch(e => alert("Ошибка звука: " + e));
+            createDrops();
+            animate();
+            setInterval(spawnWin, 400);
         };
     </script>
 </body>
