@@ -3,58 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS. MAJOR 3.0 OFFICIAL</title>
+    <title>MRS MAJOR - FINAL</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
-        
-        /* Кровавые потеки на весь экран */
-        #blood-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://giphy.com');
-            background-size: cover; z-index: 1000; pointer-events: none; display: none; opacity: 0.7;
-        }
-
-        /* Лицо Mrs. Major с глитчем */
-        .major-img {
-            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
-            background: url('https://ibb.co') center/contain no-repeat;
-            z-index: 500; display: none; filter: contrast(2) brightness(0.5) sepia(1) hue-rotate(-50deg);
-            animation: shake 0.05s infinite;
-        }
-        @keyframes shake { 0% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } 100% { transform: translate(5px, -5px); } }
-
-        #start {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #900; color: #fff; border: 4px solid #fff; padding: 40px;
-            font-size: 24px; font-weight: 900; cursor: pointer; z-index: 2000; box-shadow: 0 0 50px red;
-        }
+        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: monospace; }
+        /* Кровавый фон */
+        #b { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f00; opacity: 0; z-index: 10; pointer-events: none; }
+        /* Маска (встроил её кодом, чтобы точно была видна) */
+        #face { position: fixed; width: 100%; height: 100%; top: 0; left: 0; display: none; z-index: 5; filter: contrast(2) brightness(0.5); background: url('https://ibb.co') center/contain no-repeat; animation: s 0.05s infinite; }
+        @keyframes s { 0% { transform: translate(4px, 4px); } 50% { transform: translate(-4px, -4px); } 100% { transform: translate(4px, -4px); } }
+        /* Надписи */
+        .msg { position: fixed; color: #fff; background: #900; font-weight: 900; font-size: 25px; z-index: 50; padding: 5px; white-space: nowrap; pointer-events: none; }
+        #btn { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f00; color: #000; border: 5px solid #fff; padding: 50px; font-size: 30px; font-weight: 900; cursor: pointer; z-index: 100; border-radius: 20px; box-shadow: 0 0 100px red; }
     </style>
 </head>
 <body>
-
-    <div id="blood-overlay"></div>
-    <div class="major-img" id="face"></div>
-    
-    <button id="start" onclick="startInfection()">АКТИВИРОВАТЬ</button>
-
-    <!-- Тот самый звук "Song of Unhealing" из YouTube -->
-    <audio id="scary-audio" loop>
-        <source src="https://myinstants.com" type="audio/mpeg">
-    </audio>
+    <div id="b"></div>
+    <div id="face"></div>
+    <button id="btn" onclick="start()">ИНИЦИИРОВАТЬ</button>
 
     <script>
-        function startInfection() {
-            document.getElementById('start').style.display = 'none';
+        function start() {
+            document.getElementById('btn').style.display = 'none';
             document.getElementById('face').style.display = 'block';
-            document.getElementById('blood-overlay').style.display = 'block';
-            
-            const audio = document.getElementById('scary-audio');
-            audio.play().catch(e => console.log("Ошибка звука: включи громкость!"));
+            const b = document.getElementById('b');
+            const audio = new (window.AudioContext || window.webkitAudioContext)();
 
-            // Вибрация
+            // ТА САМАЯ МЕЛОДИЯ (Song of Unhealing) - ГРОМКО
+            const m = [261, 277, 261, 233, 220, 233, 220, 196]; // Жуткий ритм
+            let step = 0;
+
             setInterval(() => {
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            }, 500);
+                const o = audio.createOscillator();
+                const g = audio.createGain();
+                o.type = 'square'; // Самый "грязный" звук
+                o.frequency.setValueAtTime(m[step % m.length], audio.currentTime);
+                g.gain.setTargetAtTime(0.2, audio.currentTime, 0.05); // Громкость
+                o.connect(g); g.connect(audio.destination);
+                o.start(); o.stop(audio.currentTime + 0.15);
+                step++;
+
+                // Мигание кровью под ритм
+                b.style.opacity = Math.random() > 0.4 ? 0.6 : 0;
+                
+                if (navigator.vibrate) navigator.vibrate(80);
+                
+                spawnMsg();
+            }, 180);
+        }
+
+        function spawnMsg() {
+            const d = document.createElement('div');
+            d.className = 'msg';
+            const txt = ["YOU ARE TASTY", "SYSTEM DEAD", "MRS MAJOR", "666", "DIE DIE DIE"];
+            d.innerText = txt[Math.floor(Math.random() * txt.length)];
+            d.style.left = Math.random() * 80 + "%";
+            d.style.top = Math.random() * 90 + "%";
+            d.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 500);
         }
     </script>
 </body>
