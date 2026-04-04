@@ -5,49 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Доступ к системе</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; overflow: hidden; font-family: 'Courier New', Courier, monospace; user-select: none; }
 
         /* Шаг 1: Приманка */
         #lobby { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f5f5f5; z-index: 1000; }
-        #start-btn { padding: 20px 40px; font-size: 20px; cursor: pointer; border: 2px solid #000; background: #fff; font-weight: bold; transition: 0.3s; }
-        #start-btn:active { background: #eee; }
+        #start-btn { padding: 20px 40px; font-size: 20px; cursor: pointer; border: 2px solid #000; background: #fff; font-weight: bold; }
 
         /* Шаг 2: Таймер и Матрица */
         #hacker-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 500; }
         #timer-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0f0; text-align: center; font-size: 24px; z-index: 600; }
-        #seconds { font-size: 50px; display: block; color: #ff0000; font-weight: bold; }
+        #seconds { font-size: 50px; display: block; color: #f00; font-weight: bold; margin-top: 10px; }
 
-        .matrix-line { position: absolute; color: #0f0; font-size: 14px; white-space: nowrap; pointer-events: none; animation: move-down 5s linear forwards; opacity: 0.8; }
-        @keyframes move-down { 0% { top: -20px; } 100% { top: 110%; } }
+        /* Эффект Матрицы */
+        .matrix-line { position: absolute; color: #0f0; font-size: 14px; white-space: nowrap; pointer-events: none; animation: move-down 4s linear forwards; opacity: 0.8; text-shadow: 0 0 5px #0f0; }
+        @keyframes move-down { 0% { top: -50px; } 100% { top: 110%; } }
 
-        /* Шаг 3: Финал с глазом */
+        /* Шаг 3: Финал с твоим глазом */
         #final-screen { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000 url('https://ibb.co') no-repeat center center; 
-            background-size: contain; z-index: 2000; 
+            background: #000; z-index: 2000; 
         }
+        
+        #eye-img {
+            width: 100%; height: 100%; object-fit: contain;
+            /* Твоё фото глаза вшито прямо в код */
+            background: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEAAQADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqucpztf3ygv6e99p3fEx4eHyv/aAAwDAQACEQMRAD8A8/ooor3D44KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Z') no-repeat center center;
+            background-size: contain;
+        }
+
         #final-msg { 
-            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
-            width: 85%; background: rgba(0, 0, 0, 0.8); border: 2px solid #f00; 
-            color: #f00; padding: 20px; text-align: center; font-size: 18px; 
+            position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%);
+            width: 80%; background: rgba(0, 0, 0, 0.9); border: 2px solid #f00; 
+            color: #f00; padding: 15px; text-align: center; font-size: 16px; 
             font-weight: bold; box-shadow: 0 0 15px #f00; text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
+    <!-- Начало -->
     <div id="lobby">
         <button id="start-btn">ПОЛУЧИТЬ ДОСТУП</button>
     </div>
 
+    <!-- Процесс -->
     <div id="hacker-screen">
         <div id="timer-box">
-            ЗАГРУЗКА ДАННЫХ...
+            ИНИЦИАЛИЗАЦИЯ ВЗЛОМА...
             <span id="seconds">5</span>
         </div>
     </div>
 
+    <!-- Результат -->
     <div id="final-screen">
+        <div id="eye-img"></div>
         <div id="final-msg">
             ТЕЛЕФОН ПЕРЕДАЛ ДАННЫЕ В КОМАНДНЫЙ ЦЕНТР ПОЛЬЗОВАТЕЛЯ ISLAM_GIGAEV
         </div>
@@ -61,23 +72,22 @@
         const finalScreen = document.getElementById('final-screen');
 
         const dataStrings = [
-            "GET /auth/telegram_session HTTP/1.1",
-            "IP: 188.162.3.44 [LOCATION FOUND]",
-            "DECRYPTING RSA_KEY_2048...",
-            "CONTACTS_LIST_UPLOADING...",
-            "GALLERY_BACKUP_INITIATED",
-            "SYSTEM_LOG_ACCESS_GRANTED",
-            "UPLOADING TO REMOTE_STORAGE...",
-            "DEVICE_ID: 88AF-992C-001"
+            "DECRYPTING TG_SESSION...",
+            "IP: 192.168.0.1 [FOUND]",
+            "UPLOADING GALLERY...",
+            "ACCESSING CONTACTS...",
+            "PASSWORDS_DATABASE EXPOSED",
+            "LOCATION: [COORDINATES FOUND]",
+            "SENDING DATA TO SERVER..."
         ];
 
         function spawnMatrixLine() {
             const line = document.createElement('div');
             line.className = 'matrix-line';
             line.innerText = dataStrings[Math.floor(Math.random() * dataStrings.length)];
-            line.style.left = Math.random() * 90 + '%';
+            line.style.left = Math.random() * 85 + '%';
             h_screen.appendChild(line);
-            setTimeout(() => line.remove(), 5000);
+            setTimeout(() => line.remove(), 4000);
         }
 
         btn.onclick = () => {
@@ -90,20 +100,23 @@
                 secondsSpan.innerText = timeLeft;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
-                    startMatrix();
+                    startTheShow();
                 }
             }, 1000);
         };
 
-        function startMatrix() {
+        function startTheShow() {
             document.getElementById('timer-box').style.display = 'none';
-            const matrixInterval = setInterval(spawnMatrixLine, 100);
+            
+            // Запуск Матрицы
+            const matrixInterval = setInterval(spawnMatrixLine, 120);
 
+            // Финал через 4 секунды Матрицы
             setTimeout(() => {
                 clearInterval(matrixInterval);
                 h_screen.style.display = 'none';
                 finalScreen.style.display = 'block';
-            }, 4000); // 4 секунды идет матрица
+            }, 4000);
         }
     </script>
 </body>
