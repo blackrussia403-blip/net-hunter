@@ -3,118 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MrsMajor Mobile Edition</title>
+    <title>MrsMajor Mobile Stable</title>
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000; overflow: hidden; font-family: sans-serif;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+        
+        /* Кнопка старта */
+        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        #start-btn { padding: 25px 50px; background: #900; color: #fff; border: 4px solid #f00; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 0 30px #f00; }
 
-        #ui-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10000; display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.8);
-        }
+        /* Полосы крови (легкие для процессора) */
+        .blood-streak { position: absolute; top: -100%; width: 20px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 10px 10px; animation: drip 4s linear infinite; }
+        @keyframes drip { to { top: 100%; } }
 
-        #start-btn {
-            padding: 20px 40px; background: #800; color: white;
-            border: 3px solid #f00; font-size: 22px; font-weight: bold;
-            text-transform: uppercase; cursor: pointer; box-shadow: 0 0 20px #f00;
-        }
+        /* Окна Windows XP */
+        .win { position: absolute; width: 220px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; box-shadow: 5px 5px 15px #000; pointer-events: none; }
+        .win-header { background: #0054e3; color: #fff; font-size: 11px; padding: 3px 6px; font-weight: bold; }
+        .win-text { padding: 12px; color: #000; font-size: 13px; text-align: center; border-top: 1px solid #fff; }
 
-        canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 500; pointer-events: none;
-        }
-
-        .xp-win {
-            position: absolute; width: 200px; background: #ece9d8;
-            border: 2px solid #0054e3; z-index: 100;
-            animation: shake 0.1s infinite; pointer-events: none;
-        }
-        .t-bar { background: #0054e3; color: white; font-size: 10px; padding: 2px 5px; }
-        .win-body { padding: 10px; color: black; font-size: 12px; text-align: center; }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px); }
-            50% { transform: translate(-1px, -1px); }
-            100% { transform: translate(1px, 1px); }
-        }
+        /* Эффект шума */
+        #noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://giphy.com'); opacity: 0.05; pointer-events: none; z-index: 2000; }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <button id="start-btn">ЗАПУСТИТЬ</button>
-    </div>
+<div id="start-overlay"><button id="start-btn">ЗАПУСТИТЬ</button></div>
+<div id="noise"></div>
+<div id="blood-container"></div>
 
-    <canvas id="blood"></canvas>
+<audio id="audio-bgm" loop>
+    <source src="https://myinstants.com" type="audio/mpeg">
+</audio>
 
-    <audio id="horror-bgm" loop>
-        <source src="https://myinstants.com" type="audio/mpeg">
-    </audio>
+<script>
+    const btn = document.getElementById('start-btn');
+    const overlay = document.getElementById('start-overlay');
+    const audio = document.getElementById('audio-bgm');
+    const bloodCont = document.getElementById('blood-container');
 
-    <script>
-        const canvas = document.getElementById('blood');
-        const ctx = canvas.getContext('2d');
-        const bgm = document.getElementById('horror-bgm');
-        const btn = document.getElementById('start-btn');
-        const ui = document.getElementById('ui-layer');
+    // Функция создания капель крови
+    function spawnBlood() {
+        const drop = document.createElement('div');
+        drop.className = 'blood-streak';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.width = (10 + Math.random() * 30) + 'px';
+        drop.style.animationDuration = (2 + Math.random() * 3) + 's';
+        bloodCont.appendChild(drop);
+        setTimeout(() => drop.remove(), 5000);
+    }
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    // Функция создания окон
+    function spawnWin() {
+        const win = document.createElement('div');
+        win.className = 'win';
+        win.style.left = Math.random() * (window.innerWidth - 220) + 'px';
+        win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+        win.innerHTML = `
+            <div class="win-header">Critical Error</div>
+            <div class="win-text">Your system is corrupted.</div>
+        `;
+        document.body.appendChild(win);
 
-        let drops = [];
-
-        function createDrops() {
-            for(let i = 0; i < 30; i++) {
-                drops.push({
-                    x: Math.random() * canvas.width,
-                    y: 0,
-                    s: 1 + Math.random() * 4,
-                    w: 10 + Math.random() * 20
-                });
-            }
+        // Лимит окон (чтобы телефон не завис)
+        const currentWins = document.getElementsByClassName('win');
+        if (currentWins.length > 15) {
+            currentWins[0].remove();
         }
+    }
 
-        function animate() {
-            // Очистка экрана, чтобы не было "голубого" бага
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = 'rgba(120, 0, 0, 0.7)';
-            drops.forEach(d => {
-                // Рисуем след крови от самого верха
-                ctx.fillRect(d.x, 0, d.w, d.y);
-                // Капля снизу
-                ctx.beginPath();
-                ctx.arc(d.x + d.w/2, d.y, d.w/1.2, 0, Math.PI*2);
-                ctx.fill();
+    btn.onclick = () => {
+        overlay.style.display = 'none';
+        
+        // Принудительный запуск звука
+        audio.volume = 1.0;
+        audio.play().catch(e => alert("Нажми еще раз, браузер блокирует звук"));
 
-                d.y += d.s;
-                if(d.y > canvas.height + 100) d.y = -50;
-            });
-            requestAnimationFrame(animate);
-        }
+        // Интервалы
+        setInterval(spawnBlood, 300);
+        setInterval(spawnWin, 500);
 
-        function spawnWin() {
-            const w = document.createElement('div');
-            w.className = 'xp-win';
-            w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-            w.innerHTML = '<div class="t-bar">Error</div><div class="win-body">Fatal Error!</div>';
-            document.body.appendChild(w);
-            if(document.querySelectorAll('.xp-win').length > 40) {
-                document.querySelector('.xp-win').remove();
-            }
-        }
+        // Эффект "красного мигания" экрана через 10 сек
+        setTimeout(() => {
+            setInterval(() => {
+                document.body.style.backgroundColor = (document.body.style.backgroundColor === 'red' ? 'black' : 'red');
+            }, 1000);
+        }, 10000);
+    };
+</script>
 
-        btn.onclick = () => {
-            ui.style.display = 'none';
-            bgm.play().catch(e => alert("Ошибка звука: " + e));
-            createDrops();
-            animate();
-            setInterval(spawnWin, 400);
-        };
-    </script>
 </body>
 </html>
