@@ -1,22 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>NET-HUNTER TERMINAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRITICAL SYSTEM FAILURE</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { border: 2px solid #0f0; padding: 30px; text-align: center; box-shadow: 0 0 20px #0f0; }
-        .blink { color: red; animation: b 1s infinite; font-weight: bold; }
-        @keyframes b { 50% { opacity: 0; } }
-        button { background: #0f0; color: #000; border: none; padding: 10px; cursor: pointer; margin-top: 20px; font-weight: bold; }
+        body {
+            background-color: #000;
+            color: #ff0000;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Эффект помех на весь экран */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://giphy.com');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Глитч-текст */
+        .glitch {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            display: none;
+            z-index: 100;
+            text-shadow: 2px 0 #00fff0, -2px 0 #ff00ff;
+            animation: noise-anim 0.2s infinite linear alternate-reverse;
+        }
+
+        @keyframes noise-anim {
+            0% { transform: translate(2px, 1px); }
+            50% { transform: translate(-1px, -2px); }
+            100% { transform: translate(1px, 2px); }
+        }
+
+        /* Фейковые системные окна */
+        .fake-window {
+            position: absolute;
+            background: #111;
+            border: 2px solid #ff0000;
+            color: #fff;
+            padding: 10px;
+            font-size: 0.8rem;
+            box-shadow: 10px 10px 0px #300;
+            z-index: 50;
+            min-width: 150px;
+        }
+
+        .header {
+            background: #ff0000;
+            color: #000;
+            font-weight: bold;
+            padding: 2px 5px;
+            margin: -10px -10px 10px -10px;
+        }
+
+        button {
+            background: #ff0000;
+            color: #000;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 20px #ff0000;
+            z-index: 200;
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>СИСТЕМА NET-HUNTER</h1>
-        <p>СТАТУС: <span class="blink">ЗАЩИТА АКТИВНА</span></p>
-        <p>Добро пожаловать в панель управления.</p>
-        <button onclick="alert('Все системы в норме! GitHub под защитой.')">ПРОВЕРИТЬ ЛОГИ</button>
-    </div>
+
+    <div class="noise"></div>
+    <button id="btn" onclick="startSim()">ЗАПУСТИТЬ ТРОЯН</button>
+    <div id="text" class="glitch">SYSTEM INFECTED</div>
+
+    <script>
+        function startSim() {
+            document.getElementById('btn').style.display = 'none';
+            document.getElementById('text').style.display = 'block';
+            
+            // Каждые полсекунды создаем новое "страшное" окно
+            setInterval(makeWindow, 500);
+        }
+
+        function makeWindow() {
+            const win = document.createElement('div');
+            win.className = 'fake-window';
+            win.style.left = Math.random() * (window.innerWidth - 180) + 'px';
+            win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            
+            const logs = [
+                "DELETING SYSTEM32...",
+                "STEALING PASSWORDS...",
+                "UPLOADING DATA TO DARKNET",
+                "IP FOUND: 192.168.0.1",
+                "CAMERA ACCESS: GRANTED",
+                "FORMATTING DRIVE C:",
+                "WORM ACTIVATED"
+            ];
+            const msg = logs[Math.floor(Math.random() * logs.length)];
+            
+            win.innerHTML = `<div class="header">SYSTEM CRITICAL</div>${msg}`;
+            document.body.appendChild(win);
+            
+            // Чтобы телефон не завис, удаляем окно через 4 секунды
+            setTimeout(() => win.remove(), 4000);
+        }
+    </script>
 </body>
 </html>
