@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MrsMajor Ultimate Fix</title>
+    <title>MrsMajor Ultimate Visual</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: "Tahoma", sans-serif; user-select: none; }
+        
+        /* Экран запуска */
         #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        #start-btn { padding: 30px 60px; background: #900; color: #fff; border: 5px double #f00; font-size: 26px; font-weight: bold; cursor: pointer; box-shadow: 0 0 30px #f00; }
-        .blood { position: absolute; top: -110%; width: 25px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; }
+        #start-btn { padding: 25px 50px; background: #900; color: #fff; border: 5px double #f00; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 0 30px #f00; }
+
+        /* Кровь */
+        .blood { position: absolute; top: -110%; width: 25px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; pointer-events: none; }
         @keyframes drip { to { top: 110%; } }
-        .win { position: absolute; width: 200px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; animation: shake 0.1s infinite; pointer-events: none; }
-        .win-h { background: #0054e3; color: #fff; font-size: 11px; padding: 4px; font-weight: bold; }
-        .win-b { padding: 12px; color: #000; font-size: 12px; text-align: center; }
+
+        /* Окна Windows XP */
+        .win { position: absolute; width: 200px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; animation: shake 0.1s infinite, fade 6s forwards; pointer-events: none; }
+        .win-h { background: #0054e3; color: #fff; font-size: 10px; padding: 3px; font-weight: bold; }
+        .win-b { padding: 12px; color: #000; font-size: 12px; text-align: center; font-weight: bold; }
+
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, 1px); } }
+        @keyframes fade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div id="start-screen"><button id="start-btn">RUN.EXE</button></div>
+<div id="start-screen"><button id="start-btn">START MrsMajor.exe</button></div>
 <div id="blood-box"></div>
 
 <script>
@@ -26,7 +34,7 @@
     const screen = document.getElementById('start-screen');
     const bloodBox = document.getElementById('blood-box');
 
-    // Ссылка на музыку (проверь, чтобы работала)
+    // Ссылка на оригинальный звук (прямая)
     const audioUrl = 'https://myinstants.com';
     let audio = new Audio(audioUrl);
     audio.loop = true;
@@ -35,7 +43,8 @@
         const d = document.createElement('div');
         d.className = 'blood';
         d.style.left = Math.random() * 100 + '%';
-        d.style.height = (250 + Math.random() * 400) + 'px';
+        d.style.height = (250 + Math.random() * 450) + 'px';
+        d.style.width = (15 + Math.random() * 25) + 'px';
         bloodBox.appendChild(d);
         setTimeout(() => d.remove(), 4500);
     }
@@ -45,42 +54,39 @@
         w.className = 'win';
         w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
         w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-        w.innerHTML = `<div class="win-h">Critical Error</div><div class="win-b">MrsMajor Active...</div>`;
+        w.innerHTML = `<div class="win-h">Critical Error</div><div class="win-b">MrsMajor Active...<br>0x000666</div>`;
         document.body.appendChild(w);
         setTimeout(() => w.remove(), 6000);
     }
 
-    // Тот самый "силовой" метод для мобилок
+    // Силовой запуск звука
     btn.onclick = function() {
-        // 1. Разблокируем аудио-контекст
-        const context = new (window.AudioContext || window.webkitAudioContext)();
-        if (context.state === 'suspended') {
-            context.resume();
+        // 1. Пробуждаем аудио-движок телефона
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            const context = new AudioContext();
+            if (context.state === 'suspended') context.resume();
         }
 
-        // 2. "Пинаем" аудио напрямую
+        // 2. Пытаемся запустить музыку
         audio.play().then(() => {
-            console.log("Успех!");
-        }).catch(e => {
-            // 3. Если все равно не пошло - создаем алерт. 
-            // Клик по алерту ВСЕГДА включает звук на мобилках.
-            alert("Нажми ОК для активации звука!");
+            console.log("Audio started!");
+        }).catch(() => {
+            // 3. Если блокировка не снята - используем ALERT (это 100% способ)
+            alert("Нажми ОК для активации аудио-эффектов!");
             audio.play();
         });
 
         screen.style.display = 'none';
+
+        // 4. Запуск визуальной части
         setInterval(spawnBlood, 350);
         setInterval(spawnWin, 700);
 
-        // Еще один "пинок" через 2 секунды
-        setTimeout(() => {
+        // Повторный "пинок" аудио при любом клике по странице
+        document.addEventListener('click', () => {
             if (audio.paused) audio.play();
-        }, 2000);
-    };
-
-    // Дополнительный фикс: запуск звука при любом клике по экрану
-    document.body.onclick = () => {
-        if (audio.paused) audio.play();
+        }, { once: false });
     };
 </script>
 
