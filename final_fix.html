@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MrsMajor ULTIMATE</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; transition: background 3s ease-in-out; }
+        
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        #start-btn { padding: 30px 60px; background: #600; color: #fff; border: 5px double #f00; font-size: 24px; font-weight: bold; cursor: pointer; text-shadow: 0 0 10px red; }
+
+        .blood { position: absolute; top: -120%; width: 30px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; }
+        @keyframes drip { to { top: 120%; } }
+
+        .win { position: absolute; width: 160px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; animation: shake 0.1s infinite, fade 5s forwards; pointer-events: none; opacity: 0.9; }
+        .win-h { background: #0054e3; color: #fff; font-size: 10px; padding: 2px 5px; font-weight: bold; }
+        .win-b { padding: 10px; color: #000; font-size: 12px; text-align: center; }
+
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, 1px); } }
+        @keyframes fade { 0%, 80% { opacity: 0.9; } 100% { opacity: 0; } }
+
+        /* Класс для покраснения */
+        .blood-background { background: #600 !important; }
+    </style>
+</head>
+<body>
+
+<div id="overlay"><button id="start-btn">RUN PROJECT</button></div>
+<div id="blood-box"></div>
+
+<!-- Прямая ссылка на классический хоррор-саундтрек -->
+<audio id="horror-sound" crossorigin="anonymous" loop>
+    <source src="https://soundboard.com" type="audio/mpeg">
+</audio>
+
+<script>
+    const btn = document.getElementById('start-btn');
+    const overlay = document.getElementById('overlay');
+    const audio = document.getElementById('horror-sound');
+    const bloodBox = document.getElementById('blood-box');
+
+    function spawnBlood() {
+        const d = document.createElement('div');
+        d.className = 'blood';
+        d.style.left = Math.random() * 100 + '%';
+        d.style.height = (200 + Math.random() * 400) + 'px';
+        d.style.width = (20 + Math.random() * 20) + 'px';
+        bloodBox.appendChild(d);
+        setTimeout(() => d.remove(), 4000);
+    }
+
+    function spawnWin() {
+        const w = document.createElement('div');
+        w.className = 'win';
+        w.style.left = Math.random() * (window.innerWidth - 160) + 'px';
+        w.style.top = Math.random() * (window.innerHeight - 80) + 'px';
+        w.innerHTML = `<div class="win-h">System Error</div><div class="win-b">Memory Corrupted<br>0x666</div>`;
+        document.body.appendChild(w);
+        setTimeout(() => w.remove(), 5000);
+    }
+
+    // Цикл плавного покраснения экрана
+    function pulse() {
+        document.body.classList.add('blood-background');
+        setTimeout(() => {
+            document.body.classList.remove('blood-background');
+        }, 3000); // 3 секунды красный, потом резко черный
+    }
+
+    btn.onclick = () => {
+        overlay.style.display = 'none';
+        
+        // РАЗБЛОКИРОВКА ЗВУКА ДЛЯ МОБИЛОК
+        audio.volume = 1.0;
+        const playAttempt = audio.play();
+
+        if (playAttempt !== undefined) {
+            playAttempt.catch(error => {
+                // Если всё равно не пошло, выводим алерт для проверки
+                console.log("Audio failed:", error);
+                alert("Нажми ОК, чтобы музыка включилась");
+                audio.play();
+            });
+        }
+
+        setInterval(spawnBlood, 350);
+        setInterval(spawnWin, 600);
+        setInterval(pulse, 6000); // Каждые 6 сек экран наливается кровью
+    };
+</script>
+
+</body>
+</html>
