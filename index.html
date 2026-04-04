@@ -3,64 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS. MAJOR ORIGINAL</title>
+    <title>MRS. MAJOR - THE END</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Courier New', monospace; touch-action: none; }
-        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f00; z-index: 1000; display: none; pointer-events: none; }
-        .major { position: fixed; width: 100%; height: 100%; background: url('https://ibb.co') center/contain no-repeat; z-index: 500; display: none; filter: invert(1); animation: m 0.05s infinite; }
-        @keyframes m { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(5deg) translate(10px, -10px); } 100% { transform: scale(0.9) rotate(-5deg); } }
-        .msg { position: fixed; background: #f00; color: #fff; font-weight: 900; font-size: 24px; padding: 5px; z-index: 1500; white-space: nowrap; pointer-events: none; text-shadow: 2px 2px #000; }
-        #start { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f00; color: #000; border: none; padding: 50px; font-size: 2rem; font-weight: 900; cursor: pointer; z-index: 5000; box-shadow: 0 0 100px red; border-radius: 20px; }
+        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Tahoma', sans-serif; }
+        
+        /* Эффект заливки кровью */
+        #blood-fill {
+            position: fixed; top: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(to bottom, #700, #f00);
+            z-index: 100; transition: height 30s linear; pointer-events: none; opacity: 0.8;
+        }
+
+        /* Фейковые окна как на ПК */
+        .window {
+            position: absolute; width: 250px; background: #ece9d8; border: 2px solid #0054e3;
+            box-shadow: 2px 2px 10px #000; z-index: 500; font-size: 12px;
+        }
+        .title-bar { background: linear-gradient(90deg, #0054e3, #27c4fb); color: #fff; padding: 3px 5px; font-weight: bold; display: flex; justify-content: space-between; }
+        .content { padding: 15px; color: #000; text-align: center; font-weight: bold; }
+
+        .major-face {
+            position: fixed; width: 60%; top: 20%; left: 20%;
+            filter: invert(1) drop-shadow(0 0 20px red); z-index: 50;
+            animation: shake 0.1s infinite; display: none;
+        }
+        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
+
+        #start-btn {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #f00; color: #000; border: none; padding: 40px 60px;
+            font-size: 20px; font-weight: 900; cursor: pointer; z-index: 2000; box-shadow: 0 0 50px red;
+        }
     </style>
 </head>
 <body>
-    <div id="flash"></div>
-    <div class="major" id="major"></div>
-    <button id="start" onclick="go()">START INFECTION</button>
+
+    <div id="blood-fill"></div>
+    <img src="https://ibb.co" class="major-face" id="face">
+    <button id="start-btn" onclick="startInfection()">ИНИЦИИРОВАТЬ</button>
 
     <script>
-        function go() {
-            document.getElementById('start').style.display = 'none';
-            document.getElementById('major').style.display = 'block';
-            const f = document.getElementById('flash');
-            f.style.display = 'block';
+        function startInfection() {
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('face').style.display = 'block';
+            document.getElementById('blood-fill').style.height = '100%'; // Постепенная заливка
 
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
-            // ТА САМАЯ МЕЛОДИЯ (АДСКИЙ ЦИРК)
-            const melody = [261, 329, 392, 523, 493, 392, 329, 261, 220, 261, 329, 440, 415, 329, 261, 220];
-            let n = 0;
+            // ТА САМАЯ МЕЛОДИЯ (Цирковой кошмар)
+            const melody = [261, 277, 261, 247, 261, 311, 261, 247];
+            let step = 0;
 
             setInterval(() => {
-                // Синтезируем жуткий 8-бит звук
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                o.type = 'square';
-                o.frequency.setValueAtTime(melody[n % melody.length], ctx.currentTime);
-                g.gain.setTargetAtTime(0.1, ctx.currentTime, 0.05);
-                o.connect(g); g.connect(ctx.destination);
-                o.start(); o.stop(ctx.currentTime + 0.1);
-                n++;
+                // Звук
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(melody[step % melody.length], audioCtx.currentTime);
+                gain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.02);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+                step++;
 
-                // Бешеное мигание
-                f.style.opacity = Math.random() > 0.5 ? 0.8 : 0;
+                // Спамим окнами
+                createWindow();
                 
                 if (navigator.vibrate) navigator.vibrate(50);
-                
-                spawnMsg();
-            }, 120);
+            }, 150);
         }
 
-        function spawnMsg() {
-            const m = document.createElement('div');
-            m.className = 'msg';
-            const t = ["DIE", "MRS. MAJOR", "NO ESCAPE", "HA-HA-HA", "INFECTED", "666", "SYSTEM DEAD"];
-            m.innerText = t[Math.floor(Math.random() * t.length)];
-            m.style.left = Math.random() * 100 + "%";
-            m.style.top = Math.random() * 100 + "%";
-            m.style.transform = `rotate(${Math.random() * 360}deg)`;
-            document.body.appendChild(m);
-            setTimeout(() => m.remove(), 400); // Быстро исчезают, как в оригинале
+        function createWindow() {
+            const win = document.createElement('div');
+            win.className = 'window';
+            win.style.left = Math.random() * (window.innerWidth - 250) + 'px';
+            win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            
+            const titles = ["Error", "System Failure", "Mrs. Major", "0x00045"];
+            const msgs = ["YOU ARE TASTY", "SYSTEM DESTROYED", "NO ESCAPE", "DIE DIE DIE"];
+            
+            win.innerHTML = `
+                <div class="title-bar"><span>${titles[Math.floor(Math.random()*titles.length)]}</span><span>X</span></div>
+                <div class="content">${msgs[Math.floor(Math.random()*msgs.length)]}</div>
+            `;
+            document.body.appendChild(win);
+            
+            // Удаляем старые окна через 5 сек, чтобы сайт не «умер»
+            setTimeout(() => win.remove(), 5000);
         }
     </script>
 </body>
