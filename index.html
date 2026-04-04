@@ -3,92 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS. MAJOR - THE END</title>
+    <title>MRS. MAJOR - SONG OF UNHEALING</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Tahoma', sans-serif; }
-        
-        /* Эффект заливки кровью */
-        #blood-fill {
-            position: fixed; top: 0; left: 0; width: 100%; height: 0%;
-            background: linear-gradient(to bottom, #700, #f00);
-            z-index: 100; transition: height 30s linear; pointer-events: none; opacity: 0.8;
-        }
-
-        /* Фейковые окна как на ПК */
-        .window {
-            position: absolute; width: 250px; background: #ece9d8; border: 2px solid #0054e3;
-            box-shadow: 2px 2px 10px #000; z-index: 500; font-size: 12px;
-        }
-        .title-bar { background: linear-gradient(90deg, #0054e3, #27c4fb); color: #fff; padding: 3px 5px; font-weight: bold; display: flex; justify-content: space-between; }
-        .content { padding: 15px; color: #000; text-align: center; font-weight: bold; }
-
-        .major-face {
-            position: fixed; width: 60%; top: 20%; left: 20%;
-            filter: invert(1) drop-shadow(0 0 20px red); z-index: 50;
-            animation: shake 0.1s infinite; display: none;
-        }
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
-
-        #start-btn {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #f00; color: #000; border: none; padding: 40px 60px;
-            font-size: 20px; font-weight: 900; cursor: pointer; z-index: 2000; box-shadow: 0 0 50px red;
-        }
+        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Tahoma', sans-serif; touch-action: none; }
+        #blood { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #600; opacity: 0; z-index: 100; pointer-events: none; }
+        .major-face { position: fixed; width: 90%; top: 5%; left: 5%; filter: invert(1) brightness(0.6) sepia(1) saturate(5) hue-rotate(-50deg); z-index: 50; display: none; animation: shake 0.05s infinite; }
+        @keyframes shake { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } 100% { transform: translate(3px, -3px); } }
+        .win { position: absolute; width: 200px; background: #dfd8c1; border: 2px solid #000; box-shadow: 4px 4px 0 #400; z-index: 500; }
+        .t-bar { background: #500; color: #fff; padding: 2px 5px; font-size: 11px; font-weight: bold; border-bottom: 2px solid #000; }
+        .cont { padding: 10px; color: #000; text-align: center; font-weight: bold; font-size: 14px; }
+        #start { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #700; color: #fff; border: 4px solid #fff; padding: 30px; font-size: 20px; font-weight: 900; cursor: pointer; z-index: 2000; box-shadow: 0 0 50px red; }
     </style>
 </head>
 <body>
-
-    <div id="blood-fill"></div>
+    <div id="blood"></div>
     <img src="https://ibb.co" class="major-face" id="face">
-    <button id="start-btn" onclick="startInfection()">ИНИЦИИРОВАТЬ</button>
+    <button id="start" onclick="init()">INITIATE INFECTION</button>
 
     <script>
-        function startInfection() {
-            document.getElementById('start-btn').style.display = 'none';
+        function init() {
+            document.getElementById('start').style.display = 'none';
             document.getElementById('face').style.display = 'block';
-            document.getElementById('blood-fill').style.height = '100%'; // Постепенная заливка
-
+            const blood = document.getElementById('blood');
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // ТА САМАЯ МЕЛОДИЯ (Цирковой кошмар)
-            const melody = [261, 277, 261, 247, 261, 311, 261, 247];
-            let step = 0;
+
+            // ТОТ САМЫЙ РИТМ "SONG OF UNHEALING"
+            const melody = [330, 311, 261, 330, 311, 261, 330, 311, 261]; // Ноты ми-диез-до
+            let n = 0;
 
             setInterval(() => {
-                // Звук
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(melody[step % melody.length], audioCtx.currentTime);
-                gain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.02);
+                osc.type = 'triangle'; // Более мягкий, но жуткий звук "шкатулки"
+                osc.frequency.setValueAtTime(melody[n % melody.length], audioCtx.currentTime);
+                gain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.05);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.12);
-                step++;
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                n++;
 
-                // Спамим окнами
-                createWindow();
+                // Пульсация крови под ритм
+                blood.style.opacity = (n % 3 === 0) ? 0.7 : 0.2;
                 
-                if (navigator.vibrate) navigator.vibrate(50);
-            }, 150);
+                spawnWindow();
+                if (navigator.vibrate) navigator.vibrate(40);
+            }, 300); // Медленный, давящий темп
         }
 
-        function createWindow() {
-            const win = document.createElement('div');
-            win.className = 'window';
-            win.style.left = Math.random() * (window.innerWidth - 250) + 'px';
-            win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-            
-            const titles = ["Error", "System Failure", "Mrs. Major", "0x00045"];
-            const msgs = ["YOU ARE TASTY", "SYSTEM DESTROYED", "NO ESCAPE", "DIE DIE DIE"];
-            
-            win.innerHTML = `
-                <div class="title-bar"><span>${titles[Math.floor(Math.random()*titles.length)]}</span><span>X</span></div>
-                <div class="content">${msgs[Math.floor(Math.random()*msgs.length)]}</div>
-            `;
-            document.body.appendChild(win);
-            
-            // Удаляем старые окна через 5 сек, чтобы сайт не «умер»
-            setTimeout(() => win.remove(), 5000);
+        function spawnWindow() {
+            const w = document.createElement('div');
+            w.className = 'win';
+            w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            const msgs = ["YOU'VE MET WITH A TERRIBLE FATE", "CAN'T UNHEAL", "SYSTEM DEAD", "666", "NO ESCAPE"];
+            w.innerHTML = `<div class="t-bar">FATAL ERROR</div><div class="cont">${msgs[Math.floor(Math.random()*msgs.length)]}</div>`;
+            document.body.appendChild(w);
+            setTimeout(() => w.remove(), 3000);
         }
     </script>
 </body>
