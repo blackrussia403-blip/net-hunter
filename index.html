@@ -3,131 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MrsMajor Visual Project</title>
+    <title>MrsMajor Ultimate Fix</title>
     <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: #000; overflow: hidden; font-family: "Tahoma", sans-serif; 
-            transition: background 0.5s; user-select: none;
-        }
-
-        /* Начальный экран (нужен для разблокировки звука в браузере) */
-        #start-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; z-index: 10000; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; 
-        }
-        #start-btn { 
-            padding: 25px 50px; background: #800; color: #fff; 
-            border: 4px double #f00; font-size: 24px; font-weight: bold; 
-            cursor: pointer; box-shadow: 0 0 40px #f00; text-transform: uppercase;
-        }
-        #hint { color: #444; margin-top: 20px; font-size: 14px; letter-spacing: 2px; }
-
-        /* Контейнер для крови */
-        #blood-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 500; pointer-events: none; }
-        .blood-drip { 
-            position: absolute; top: -100px; width: 25px; 
-            background: linear-gradient(to bottom, transparent, #8a0303 30%, #600 100%); 
-            border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; 
-            box-shadow: 0 0 10px #400;
-        }
-        @keyframes drip { to { top: 120%; } }
-
-        /* Окна ошибок Windows XP */
-        .xp-window { 
-            position: absolute; width: 220px; background: #ece9d8; 
-            border: 2px solid #0054e3; border-top-left-radius: 4px; 
-            border-top-right-radius: 4px; z-index: 1000; 
-            box-shadow: 10px 10px 30px rgba(0,0,0,0.7); 
-            animation: shake 0.1s infinite, fadeOut 6s forwards; 
-            pointer-events: none;
-        }
-        .title-bar { 
-            background: linear-gradient(180deg, #0054e3 0%, #27c1ff 100%); 
-            color: white; padding: 4px 8px; font-weight: bold; font-size: 11px; 
-            display: flex; justify-content: space-between; 
-        }
-        .win-content { padding: 15px; color: #000; text-align: center; font-size: 13px; font-weight: bold; }
-
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, 1px); } }
-        @keyframes fadeOut { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
-
-        /* Эффект шума на фоне */
-        #noise { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: url('https://giphy.com'); 
-            opacity: 0.05; pointer-events: none; z-index: 2000; 
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; user-select: none; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        #start-btn { padding: 30px 60px; background: #900; color: #fff; border: 5px double #f00; font-size: 26px; font-weight: bold; cursor: pointer; box-shadow: 0 0 30px #f00; }
+        .blood { position: absolute; top: -110%; width: 25px; background: linear-gradient(to bottom, transparent, #8a0303); z-index: 500; border-radius: 0 0 20px 20px; animation: drip 4s linear infinite; }
+        @keyframes drip { to { top: 110%; } }
+        .win { position: absolute; width: 200px; background: #ece9d8; border: 2px solid #0054e3; z-index: 1000; animation: shake 0.1s infinite; pointer-events: none; }
+        .win-h { background: #0054e3; color: #fff; font-size: 11px; padding: 4px; font-weight: bold; }
+        .win-b { padding: 12px; color: #000; font-size: 12px; text-align: center; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, 1px); } }
     </style>
 </head>
 <body>
 
-    <div id="start-screen">
-        <button id="start-btn">START PROJECT</button>
-        <div id="hint">ПРОВЕРЬ ГРОМКОСТЬ</div>
-    </div>
+<div id="start-screen"><button id="start-btn">RUN.EXE</button></div>
+<div id="blood-box"></div>
 
-    <div id="noise"></div>
-    <div id="blood-container"></div>
+<script>
+    const btn = document.getElementById('start-btn');
+    const screen = document.getElementById('start-screen');
+    const bloodBox = document.getElementById('blood-box');
 
-    <script>
-        const btn = document.getElementById('start-btn');
-        const screen = document.getElementById('start-screen');
-        const bloodBox = document.getElementById('blood-container');
+    // Ссылка на музыку (проверь, чтобы работала)
+    const audioUrl = 'https://myinstants.com';
+    let audio = new Audio(audioUrl);
+    audio.loop = true;
 
-        // Создаем аудио-объект в памяти (так надежнее для мобильных)
-        const audio = new Audio('https://myinstants.com');
-        audio.loop = true;
+    function spawnBlood() {
+        const d = document.createElement('div');
+        d.className = 'blood';
+        d.style.left = Math.random() * 100 + '%';
+        d.style.height = (250 + Math.random() * 400) + 'px';
+        bloodBox.appendChild(d);
+        setTimeout(() => d.remove(), 4500);
+    }
 
-        function spawnBlood() {
-            const d = document.createElement('div');
-            d.className = 'blood-drip';
-            d.style.left = Math.random() * 100 + '%';
-            d.style.height = (200 + Math.random() * 400) + 'px';
-            d.style.width = (15 + Math.random() * 25) + 'px';
-            bloodBox.appendChild(d);
-            setTimeout(() => d.remove(), 4500);
+    function spawnWin() {
+        const w = document.createElement('div');
+        w.className = 'win';
+        w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+        w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+        w.innerHTML = `<div class="win-h">Critical Error</div><div class="win-b">MrsMajor Active...</div>`;
+        document.body.appendChild(w);
+        setTimeout(() => w.remove(), 6000);
+    }
+
+    // Тот самый "силовой" метод для мобилок
+    btn.onclick = function() {
+        // 1. Разблокируем аудио-контекст
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') {
+            context.resume();
         }
 
-        function spawnWindow() {
-            const w = document.createElement('div');
-            w.className = 'xp-window';
-            w.style.left = Math.random() * (window.innerWidth - 220) + 'px';
-            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-            w.innerHTML = `
-                <div class="title-bar"><span>System Error</span><span style="border:1px solid #fff;padding:0 3px;">X</span></div>
-                <div class="win-content">Memory Corrupted<br>MrsMajor Active</div>
-            `;
-            document.body.appendChild(w);
-            setTimeout(() => w.remove(), 6000);
-        }
+        // 2. "Пинаем" аудио напрямую
+        audio.play().then(() => {
+            console.log("Успех!");
+        }).catch(e => {
+            // 3. Если все равно не пошло - создаем алерт. 
+            // Клик по алерту ВСЕГДА включает звук на мобилках.
+            alert("Нажми ОК для активации звука!");
+            audio.play();
+        });
 
-        // Главная функция запуска
-        btn.onclick = () => {
-            // Пытаемся разблокировать аудио-контекст
-            const context = new (window.AudioContext || window.webkitAudioContext)();
-            if (context.state === 'suspended') context.resume();
+        screen.style.display = 'none';
+        setInterval(spawnBlood, 350);
+        setInterval(spawnWin, 700);
 
-            screen.style.display = 'none';
+        // Еще один "пинок" через 2 секунды
+        setTimeout(() => {
+            if (audio.paused) audio.play();
+        }, 2000);
+    };
 
-            // Попытка принудительного воспроизведения
-            audio.volume = 1.0;
-            audio.play().catch(() => {
-                // Если браузер все еще сопротивляется, ставим обработчик на следующий клик
-                window.onclick = () => audio.play();
-            });
+    // Дополнительный фикс: запуск звука при любом клике по экрану
+    document.body.onclick = () => {
+        if (audio.paused) audio.play();
+    };
+</script>
 
-            // Запуск визуальных эффектов
-            setInterval(spawnBlood, 350);
-            setInterval(spawnWindow, 700);
-
-            // Эффект покраснения фона каждые 8 секунд
-            setInterval(() => {
-                document.body.style.background = "#600";
-                setTimeout(() => document.body.style.background = "#000", 2500);
-            }, 8000);
-        };
-    </script>
 </body>
 </html>
