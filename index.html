@@ -3,61 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS. MAJOR - SONG OF UNHEALING</title>
+    <title>MRS. MAJOR 3.0 OFFICIAL</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Tahoma', sans-serif; touch-action: none; }
-        #blood { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #600; opacity: 0; z-index: 100; pointer-events: none; }
-        .major-face { position: fixed; width: 90%; top: 5%; left: 5%; filter: invert(1) brightness(0.6) sepia(1) saturate(5) hue-rotate(-50deg); z-index: 50; display: none; animation: shake 0.05s infinite; }
-        @keyframes shake { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } 100% { transform: translate(3px, -3px); } }
-        .win { position: absolute; width: 200px; background: #dfd8c1; border: 2px solid #000; box-shadow: 4px 4px 0 #400; z-index: 500; }
-        .t-bar { background: #500; color: #fff; padding: 2px 5px; font-size: 11px; font-weight: bold; border-bottom: 2px solid #000; }
-        .cont { padding: 10px; color: #000; text-align: center; font-weight: bold; font-size: 14px; }
-        #start { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #700; color: #fff; border: 4px solid #fff; padding: 30px; font-size: 20px; font-weight: 900; cursor: pointer; z-index: 2000; box-shadow: 0 0 50px red; }
+        body { background: #000; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
+        
+        /* Кровавые потеки на весь экран */
+        #blood-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://giphy.com');
+            background-size: cover; z-index: 1000; pointer-events: none; display: none; opacity: 0.7;
+        }
+
+        /* Лицо Mrs. Major с глитчем */
+        .major-img {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
+            background: url('https://ibb.co') center/contain no-repeat;
+            z-index: 500; display: none; filter: contrast(2) brightness(0.5) sepia(1) hue-rotate(-50deg);
+            animation: shake 0.05s infinite;
+        }
+        @keyframes shake { 0% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } 100% { transform: translate(5px, -5px); } }
+
+        #start {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #900; color: #fff; border: 4px solid #fff; padding: 40px;
+            font-size: 24px; font-weight: 900; cursor: pointer; z-index: 2000; box-shadow: 0 0 50px red;
+        }
     </style>
 </head>
 <body>
-    <div id="blood"></div>
-    <img src="https://ibb.co" class="major-face" id="face">
-    <button id="start" onclick="init()">INITIATE INFECTION</button>
+
+    <div id="blood-overlay"></div>
+    <div class="major-img" id="face"></div>
+    
+    <button id="start" onclick="startInfection()">АКТИВИРОВАТЬ</button>
+
+    <!-- Тот самый звук "Song of Unhealing" из YouTube -->
+    <audio id="scary-audio" loop>
+        <source src="https://myinstants.com" type="audio/mpeg">
+    </audio>
 
     <script>
-        function init() {
+        function startInfection() {
             document.getElementById('start').style.display = 'none';
             document.getElementById('face').style.display = 'block';
-            const blood = document.getElementById('blood');
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            document.getElementById('blood-overlay').style.display = 'block';
+            
+            const audio = document.getElementById('scary-audio');
+            audio.play().catch(e => console.log("Ошибка звука: включи громкость!"));
 
-            // ТОТ САМЫЙ РИТМ "SONG OF UNHEALING"
-            const melody = [330, 311, 261, 330, 311, 261, 330, 311, 261]; // Ноты ми-диез-до
-            let n = 0;
-
+            // Вибрация
             setInterval(() => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'triangle'; // Более мягкий, но жуткий звук "шкатулки"
-                osc.frequency.setValueAtTime(melody[n % melody.length], audioCtx.currentTime);
-                gain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.05);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-                n++;
-
-                // Пульсация крови под ритм
-                blood.style.opacity = (n % 3 === 0) ? 0.7 : 0.2;
-                
-                spawnWindow();
-                if (navigator.vibrate) navigator.vibrate(40);
-            }, 300); // Медленный, давящий темп
-        }
-
-        function spawnWindow() {
-            const w = document.createElement('div');
-            w.className = 'win';
-            w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-            const msgs = ["YOU'VE MET WITH A TERRIBLE FATE", "CAN'T UNHEAL", "SYSTEM DEAD", "666", "NO ESCAPE"];
-            w.innerHTML = `<div class="t-bar">FATAL ERROR</div><div class="cont">${msgs[Math.floor(Math.random()*msgs.length)]}</div>`;
-            document.body.appendChild(w);
-            setTimeout(() => w.remove(), 3000);
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }, 500);
         }
     </script>
 </body>
