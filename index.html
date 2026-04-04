@@ -1,63 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS MAJOR ULTIMATE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MrsMajor Visual Simulation</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Tahoma', sans-serif; }
-        /* Эффект стекающей крови */
-        #blood { position: fixed; top: -100%; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, #f00, #700); z-index: 100; pointer-events: none; transition: top 20s linear; }
-        /* Окна Windows XP */
-        .win { position: absolute; width: 200px; background: #ece9d8; border: 2px solid #0054e3; box-shadow: 3px 3px 10px #000; z-index: 500; }
-        .head { background: linear-gradient(90deg, #0054e3, #27c4fb); color: #fff; padding: 2px 5px; font-size: 11px; font-weight: bold; display: flex; justify-content: space-between; }
-        .body { padding: 10px; color: #000; text-align: center; font-size: 13px; font-weight: bold; }
-        .major { position: fixed; width: 80%; top: 10%; left: 10%; filter: invert(1) brightness(0.5); z-index: 50; display: none; animation: s 0.05s infinite; }
-        @keyframes s { 0% { transform: translate(5px,5px); } 50% { transform: translate(-5px,-5px); } }
-        #btn { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f00; color: #fff; border: 4px solid #fff; padding: 30px; font-size: 20px; font-weight: 900; cursor: pointer; z-index: 2000; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; overflow: hidden; font-family: "Tahoma", sans-serif;
+        }
+
+        /* Слой с помехами (Глитч) */
+        #glitch-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://giphy.com');
+            opacity: 0.15; pointer-events: none; z-index: 5;
+        }
+
+        /* Слой для отрисовки крови */
+        #bloodCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1000; pointer-events: none;
+        }
+
+        /* Стилизация окон Windows XP */
+        .window {
+            position: absolute; width: 320px; height: 160px;
+            background: #ece9d8; border: 2px solid #0054e3;
+            border-top-left-radius: 4px; border-top-right-radius: 4px;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.6);
+            z-index: 10; animation: shake 0.2s infinite;
+        }
+
+        .title-bar {
+            background: linear-gradient(180deg, #0054e3 0%, #27c1ff 100%);
+            color: white; padding: 3px 8px; font-weight: bold; font-size: 13px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .window-content {
+            padding: 15px; color: #000; text-align: center; font-size: 14px;
+        }
+
+        .error-icon {
+            color: red; font-size: 30px; font-weight: bold; margin-bottom: 10px;
+        }
+
+        /* Анимация тряски окон */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -2px); }
+            100% { transform: translate(1px, 1px); }
+        }
+
+        /* Инструкция в центре */
+        #start-hint {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #8a0303; font-size: 24px; text-transform: uppercase;
+            letter-spacing: 5px; cursor: pointer; z-index: 2000;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div id="blood"></div>
-    <img src="https://ibb.co" class="major" id="m">
-    <button id="btn" onclick="go()">START INFECTION</button>
+
+    <div id="start-hint">CLICK TO RUN MrsMajor.exe</div>
+    <div id="glitch-overlay"></div>
+    <canvas id="bloodCanvas"></canvas>
+
+    <!-- Музыка: Song of Unhealing (MrsMajor BGM) -->
+    <audio id="bgm" loop>
+        <source src="https://myinstants.com" type="audio/mpeg">
+    </audio>
 
     <script>
-        function go() {
-            document.getElementById('btn').style.display = 'none';
-            document.getElementById('m').style.display = 'block';
-            document.getElementById('blood').style.top = '0'; // Кровь потекла вниз
+        const canvas = document.getElementById('bloodCanvas');
+        const ctx = canvas.getContext('2d');
+        const bgm = document.getElementById('bgm');
+        const hint = document.getElementById('start-hint');
 
-            const audio = new (window.AudioContext || window.webkitAudioContext)();
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Настройки крови
+        let bloodDrops = [];
+        function initBlood() {
+            for(let i = 0; i < 60; i++) {
+                bloodDrops.push({
+                    x: Math.random() * canvas.width,
+                    y: -Math.random() * 200,
+                    speed: 0.5 + Math.random() * 2,
+                    radius: 15 + Math.random() * 25
+                });
+            }
+        }
+
+        function drawBlood() {
+            ctx.fillStyle = 'rgba(120, 0, 0, 0.4)';
+            bloodDrops.forEach(drop => {
+                // Рисуем "подтек"
+                ctx.fillRect(drop.x - drop.radius/2, 0, drop.radius, drop.y);
+                // Рисуем каплю
+                ctx.beginPath();
+                ctx.arc(drop.x, drop.y, drop.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                drop.y += drop.speed;
+                // Когда капля доходит до низа, она не исчезает, а "накапливается"
+                if (drop.y > canvas.height + 50) {
+                    drop.y = -50;
+                    drop.speed += 0.1; // Ускоряем поток
+                }
+            });
+            requestAnimationFrame(drawBlood);
+        }
+
+        // Функция создания окон ошибок
+        function spawnWindow() {
+            const win = document.createElement('div');
+            win.className = 'window';
             
-            // ТА САМАЯ МЕЛОДИЯ (Song of Unhealing)
-            const notes =; 
-            let n = 0;
-
-            setInterval(() => {
-                const o = audio.createOscillator();
-                const g = audio.createGain();
-                o.type = 'triangle'; // Звук шкатулки
-                o.frequency.setValueAtTime(notes[n % notes.length], audio.currentTime);
-                g.gain.setTargetAtTime(0.1, audio.currentTime, 0.05);
-                o.connect(g); g.connect(audio.destination);
-                o.start(); o.stop(audio.currentTime + 0.25);
-                n++;
-                
-                spawnWin();
-                if (navigator.vibrate) navigator.vibrate(40);
-            }, 350); // Ритм шкатулки
+            // Случайная позиция
+            const x = Math.random() * (window.innerWidth - 320);
+            const y = Math.random() * (window.innerHeight - 160);
+            win.style.left = x + 'px';
+            win.style.top = y + 'px';
+            
+            // Наполнение окна
+            win.innerHTML = `
+                <div class="title-bar">
+                    <span>Critical Error: 0x666</span>
+                    <span style="background: #e04343; padding: 0 5px; border: 1px solid white;">X</span>
+                </div>
+                <div class="window-content">
+                    <div class="error-icon">X</div>
+                    <p>Your system is bleeding...</p>
+                    <p>Mrs. Major is here.</p>
+                </div>
+            `;
+            
+            document.body.appendChild(win);
         }
 
-        function spawnWin() {
-            const w = document.createElement('div');
-            w.className = 'win';
-            w.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-            w.innerHTML = `<div class="head"><span>Error</span><span>X</span></div><div class="body">YOU ARE TASTY</div>`;
-            document.body.appendChild(w);
-            setTimeout(() => w.remove(), 4000);
-        }
+        // Запуск всего процесса
+        document.addEventListener('click', () => {
+            hint.style.display = 'none'; // Убираем надпись
+            bgm.volume = 0.7;
+            bgm.play();
+            
+            initBlood();
+            drawBlood();
+            
+            // Спамим окнами каждые 300мс
+            setInterval(spawnWindow, 350);
+            
+            // Через 10 секунд увеличиваем скорость спама
+            setTimeout(() => {
+                setInterval(spawnWindow, 150);
+            }, 10000);
+
+        }, { once: true });
+
+        // Ресайз канваса при изменении окна
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
