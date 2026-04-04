@@ -3,119 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRITICAL SYSTEM FAILURE</title>
+    <title>TERMINAL CRITICAL FAILURE</title>
     <style>
-        body {
-            background-color: #000;
-            color: #ff0000;
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+        body { background: #000; color: #f00; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        
+        /* Эффект помех и крови */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.1); pointer-events: none; z-index: 1000; display: none; animation: flash 0.1s infinite; }
+        @keyframes flash { 0% { opacity: 0.1; } 50% { opacity: 0.3; } 100% { opacity: 0.1; } }
 
-        /* Эффект помех на весь экран */
-        .noise {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://giphy.com');
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 1000;
-        }
+        /* Глитч заголовок */
+        .glitch-mega { font-size: 3rem; font-weight: bold; text-align: center; display: none; z-index: 100; text-shadow: 3px 3px #0ff, -3px -3px #f0f; animation: shake 0.2s infinite; }
+        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
 
-        /* Глитч-текст */
-        .glitch {
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            position: relative;
-            display: none;
-            z-index: 100;
-            text-shadow: 2px 0 #00fff0, -2px 0 #ff00ff;
-            animation: noise-anim 0.2s infinite linear alternate-reverse;
-        }
+        .win { position: absolute; background: #000; border: 2px solid #f00; color: #fff; padding: 10px; font-size: 12px; box-shadow: 0 0 20px #f00; z-index: 50; width: 220px; }
+        .win-h { background: #f00; color: #000; font-weight: bold; padding: 2px 5px; margin: -10px -10px 10px -10px; }
 
-        @keyframes noise-anim {
-            0% { transform: translate(2px, 1px); }
-            50% { transform: translate(-1px, -2px); }
-            100% { transform: translate(1px, 2px); }
-        }
-
-        /* Фейковые системные окна */
-        .fake-window {
-            position: absolute;
-            background: #111;
-            border: 2px solid #ff0000;
-            color: #fff;
-            padding: 10px;
-            font-size: 0.8rem;
-            box-shadow: 10px 10px 0px #300;
-            z-index: 50;
-            min-width: 150px;
-        }
-
-        .header {
-            background: #ff0000;
-            color: #000;
-            font-weight: bold;
-            padding: 2px 5px;
-            margin: -10px -10px 10px -10px;
-        }
-
-        button {
-            background: #ff0000;
-            color: #000;
-            border: none;
-            padding: 20px 40px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 20px #ff0000;
-            z-index: 200;
-        }
+        #btn { background: #f00; color: #000; border: none; padding: 30px 60px; font-size: 1.8rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 50px #f00; z-index: 200; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="noise"></div>
-    <button id="btn" onclick="startSim()">ЗАПУСТИТЬ ТРОЯН</button>
-    <div id="text" class="glitch">SYSTEM INFECTED</div>
+    <div class="overlay" id="blood"></div>
+    <button id="btn" onclick="hack()">ИНИЦИИРОВАТЬ ВЗЛОМ</button>
+    <div id="msg" class="glitch-mega">USER DATA LEAKED</div>
 
     <script>
-        function startSim() {
+        function hack() {
             document.getElementById('btn').style.display = 'none';
-            document.getElementById('text').style.display = 'block';
+            document.getElementById('msg').style.display = 'block';
+            document.getElementById('blood').style.display = 'block';
             
-            // Каждые полсекунды создаем новое "страшное" окно
-            setInterval(makeWindow, 500);
+            // Звук (синтезируем писк, так как файл загружать долго)
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            setInterval(() => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(Math.random() * 400 + 100, audioCtx.currentTime);
+                osc.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+                
+                // Вибрация (работает на Android)
+                if (navigator.vibrate) navigator.vibrate(50);
+                
+                makeWin();
+            }, 300);
         }
 
-        function makeWindow() {
-            const win = document.createElement('div');
-            win.className = 'fake-window';
-            win.style.left = Math.random() * (window.innerWidth - 180) + 'px';
-            win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+        function makeWin() {
+            const w = document.createElement('div');
+            w.className = 'win';
+            w.style.left = Math.random() * (window.innerWidth - 220) + 'px';
+            w.style.top = Math.random() * (window.innerHeight - 100) + 'px';
             
-            const logs = [
-                "DELETING SYSTEM32...",
-                "STEALING PASSWORDS...",
-                "UPLOADING DATA TO DARKNET",
-                "IP FOUND: 192.168.0.1",
-                "CAMERA ACCESS: GRANTED",
-                "FORMATTING DRIVE C:",
-                "WORM ACTIVATED"
+            const list = [
+                "КОПИРОВАНИЕ ПАРОЛЕЙ GOOGLE...",
+                "ДОСТУП К TELEGRAM: ПОЛУЧЕН",
+                "ПЕРЕХВАТ СМС-СООБЩЕНИЙ...",
+                "ВЗЛОМ ПРИЛОЖЕНИЙ БАНКА...",
+                "ЗАГРУЗКА ФОТО ИЗ ГАЛЕРЕИ...",
+                "МЕСТОПОЛОЖЕНИЕ ОПРЕДЕЛЕНО",
+                "УДАЛЕНИЕ ВСЕХ КОНТАКТОВ...",
+                "IP АДРЕС: ОТСЛЕЖИВАЕТСЯ"
             ];
-            const msg = logs[Math.floor(Math.random() * logs.length)];
             
-            win.innerHTML = `<div class="header">SYSTEM CRITICAL</div>${msg}`;
-            document.body.appendChild(win);
-            
-            // Чтобы телефон не завис, удаляем окно через 4 секунды
-            setTimeout(() => win.remove(), 4000);
+            w.innerHTML = `<div class="win-h">ВНИМАНИЕ!</div>${list[Math.floor(Math.random() * list.length)]}`;
+            document.body.appendChild(w);
+            setTimeout(() => w.remove(), 5000);
         }
     </script>
 </body>
