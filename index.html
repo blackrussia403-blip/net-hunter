@@ -3,97 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRS. MAJOR EXTREME</title>
+    <title>MRS. MAJOR ORIGINAL</title>
     <style>
-        body { background: #000; color: #f00; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
-        
-        /* Заливка кровью */
-        .blood-flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f00; opacity: 0; pointer-events: none; z-index: 1000; display: none; }
-
-        /* Маска Mrs. Major */
-        .major-face {
-            position: fixed; width: 80%; height: 80%; top: 10%; left: 10%;
-            background: url('https://ibb.co') no-repeat center;
-            background-size: contain;
-            filter: drop-shadow(0 0 50px red) invert(1);
-            display: none; z-index: 50;
-            animation: glitch-face 0.05s infinite;
-        }
-
-        @keyframes glitch-face {
-            0% { transform: scale(1); filter: invert(1) hue-rotate(0deg); }
-            50% { transform: scale(1.1) translate(10px, -10px); filter: invert(0) hue-rotate(90deg); }
-            100% { transform: scale(0.9) translate(-10px, 10px); filter: invert(1) hue-rotate(180deg); }
-        }
-
-        /* Летающий чат */
-        .chat-line { position: fixed; white-space: nowrap; font-weight: 900; font-size: 20px; color: #fff; background: #f00; padding: 2px 10px; z-index: 200; pointer-events: none; }
-
-        #btn { background: #f00; color: #000; border: none; padding: 40px; font-size: 2rem; font-weight: 900; cursor: pointer; box-shadow: 0 0 100px #f00; z-index: 3000; border-radius: 50%; }
+        body { background: #000; margin: 0; overflow: hidden; height: 100vh; font-family: 'Courier New', monospace; touch-action: none; }
+        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f00; z-index: 1000; display: none; pointer-events: none; }
+        .major { position: fixed; width: 100%; height: 100%; background: url('https://ibb.co') center/contain no-repeat; z-index: 500; display: none; filter: invert(1); animation: m 0.05s infinite; }
+        @keyframes m { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(5deg) translate(10px, -10px); } 100% { transform: scale(0.9) rotate(-5deg); } }
+        .msg { position: fixed; background: #f00; color: #fff; font-weight: 900; font-size: 24px; padding: 5px; z-index: 1500; white-space: nowrap; pointer-events: none; text-shadow: 2px 2px #000; }
+        #start { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f00; color: #000; border: none; padding: 50px; font-size: 2rem; font-weight: 900; cursor: pointer; z-index: 5000; box-shadow: 0 0 100px red; border-radius: 20px; }
     </style>
 </head>
 <body>
-
-    <div class="blood-flash" id="blood"></div>
-    <div class="major-face" id="face"></div>
-    
-    <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
-        <button id="btn" onclick="startNightmare()">ИНИЦИИРОВАТЬ</button>
-    </div>
+    <div id="flash"></div>
+    <div class="major" id="major"></div>
+    <button id="start" onclick="go()">START INFECTION</button>
 
     <script>
-        function startNightmare() {
-            document.getElementById('btn').style.display = 'none';
-            document.getElementById('face').style.display = 'block';
-            const blood = document.getElementById('blood');
-            blood.style.display = 'block';
+        function go() {
+            document.getElementById('start').style.display = 'none';
+            document.getElementById('major').style.display = 'block';
+            const f = document.getElementById('flash');
+            f.style.display = 'block';
 
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             
-            // Мелодия Mrs. Major (упрощенная 8-бит версия)
-            let notes = [440, 466, 440, 349, 440, 466, 523, 440];
-            let i = 0;
+            // ТА САМАЯ МЕЛОДИЯ (АДСКИЙ ЦИРК)
+            const melody = [261, 329, 392, 523, 493, 392, 329, 261, 220, 261, 329, 440, 415, 329, 261, 220];
+            let n = 0;
 
             setInterval(() => {
-                // Играем ноту
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(notes[i % notes.length], ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.15);
-                i++;
+                // Синтезируем жуткий 8-бит звук
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'square';
+                o.frequency.setValueAtTime(melody[n % melody.length], ctx.currentTime);
+                g.gain.setTargetAtTime(0.1, ctx.currentTime, 0.05);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(); o.stop(ctx.currentTime + 0.1);
+                n++;
 
-                // Вспышки крови
-                blood.style.opacity = Math.random() > 0.5 ? 0.3 : 0;
+                // Бешеное мигание
+                f.style.opacity = Math.random() > 0.5 ? 0.8 : 0;
                 
-                // Вибрация
-                if (navigator.vibrate) navigator.vibrate(100);
+                if (navigator.vibrate) navigator.vibrate(50);
                 
-                spawnChat();
-            }, 150);
+                spawnMsg();
+            }, 120);
         }
 
-        function spawnChat() {
-            const line = document.createElement('div');
-            line.className = 'chat-line';
-            const msgs = ["YOU CANNOT RUN", "MRS. MAJOR IS HERE", "SYSTEM DESTROYED", "HA-HA-HA-HA", "FILES CORRUPTED", "ACCESS DENIED", "DIE DIE DIE"];
-            line.innerText = msgs[Math.floor(Math.random() * msgs.length)];
-            line.style.left = "-200px";
-            line.style.top = Math.random() * 90 + "vh";
-            document.body.appendChild(line);
-
-            // Анимация полета чата
-            let pos = -200;
-            const anim = setInterval(() => {
-                pos += 20;
-                line.style.left = pos + "px";
-                if (pos > window.innerWidth) {
-                    clearInterval(anim);
-                    line.remove();
-                }
-            }, 20);
+        function spawnMsg() {
+            const m = document.createElement('div');
+            m.className = 'msg';
+            const t = ["DIE", "MRS. MAJOR", "NO ESCAPE", "HA-HA-HA", "INFECTED", "666", "SYSTEM DEAD"];
+            m.innerText = t[Math.floor(Math.random() * t.length)];
+            m.style.left = Math.random() * 100 + "%";
+            m.style.top = Math.random() * 100 + "%";
+            m.style.transform = `rotate(${Math.random() * 360}deg)`;
+            document.body.appendChild(m);
+            setTimeout(() => m.remove(), 400); // Быстро исчезают, как в оригинале
         }
     </script>
 </body>
